@@ -15,70 +15,89 @@ wrong label is not graded.
 
 **Issue link**
 
-[The individual Path Review issue page. A link to the repository or the issue list
-does not satisfy this field.]
+https://github.com/codepath/pathreview-ai301-fa26-s1/issues/45
 
 **Verdict output**
 
-[Your skill's live-mode output for this issue, pasted verbatim and ending with the
-fenced JSON verdict block. A summary does not satisfy this field.]
-
-**The verdict must record `accept` for this issue.** Choose an issue your own skill
-accepts. If your skill rejects every candidate you try, that is a signal about your
-rubric rather than about the issues: revise it and re-run — retries are unlimited and a
-partial re-run costs about $0.20 — or run the skill on different candidates. Output
-recording `reject` for the issue you chose earns no credit for this field.
-
 ```
-paste the output here, including the closing JSON block
+Grading
+
+#45 — No property-based tests for the PII scrubber
+
+Check	Grade	Evidence
+active_release	pass	Same repo-wide fact: last push 2026-09-16
+unclaimed	pass	assignees: [], 0 comments
+stale_issue	pass	No comments
+clear_scope	pass	One bounded ask: add hypothesis-based property tests to tests/unit/test_pii_scrubber.py; names the file and an effort estimate (4–6h)
+has_labels	pass	Labeled enhancement, tests, tier-2
+maintainer_responsive	unclear	Same repo-wide absence of any maintainer comment sample
+has_contributing_docs	fail	Same repo-wide fact
+Verdict: accept
+
+Ranking by fit (your profile: Python-first, backend priority, want feature work over bug fixes, avoid gnarly concurrency):
+
+All three accept, all three tie on the preferred checks (unclear / fail across the board — the repo-wide facts don't differentiate them). Ranking on fit alone:
+
+1. #45 — PII scrubber property-based tests. Purely backend Python, genuinely new feature-building (not just patching a bug), and hypothesis is a good skill to pick up. Self-contained enough not to require deep system knowledge, but still a step up from a one-line fix.
+
+{
+   "item": "https://github.com/codepath/pathreview-ai301-fa26-s1/issues/45",
+   "checks": [
+   {"name": "active_release", "grade": "pass", "evidence": "No Release published; last push to main 2026-09-16, within 12 months of 2026-09-19"},
+   {"name": "unclaimed", "grade": "pass", "evidence": "assignees: [], 0 comments, no linked PRs"},
+   {"name": "stale_issue", "grade": "pass", "evidence": "No comments exist on the thread"},
+   {"name": "clear_scope", "grade": "pass", "evidence": "Body specifies adding hypothesis property-based tests to tests/unit/test_pii_scrubber.py with a 4-6h estimate"},
+   {"name": "has_labels", "grade": "pass", "evidence": "Labels: enhancement, tests, tier-2"},
+   {"name": "maintainer_responsive", "grade": "unclear", "evidence": "No maintainer (Owner/Member/Collaborator) comments found anywhere in the repo to sample"},
+   {"name": "has_contributing_docs", "grade": "fail", "evidence": "No CONTRIBUTING.md, AGENTS.md, or AI policy file at repo root"}
+   ],
+   "verdict": "accept"
+}
 ```
 
 ---
 
 ## Eval iterations
 
-Quote source text directly in each field below. Paraphrase does not satisfy them.
-
 **Run history**
 
-[The agreement score of each run you did, in order. A single run is a complete answer if
-only one run occurred. **The last score in your list must match the agreement line in the
-`eval-run.txt` you committed** — that file is the record of your final run.]
+1. 7/20
+2. 12/20
+3. 16/20
+4. 17/20
+5. 17/20
+6. 19/20
+7. 18/20
 
 **Issue analysis**
 
-[One scored issue, identified by id (`issue-01` through `issue-20`; the `calib-`
-issues are not scored). State your rubric's decision, the gold label, and the
-reasoning that produced your rubric's result.]
+- Issue: `issue-01`
+- Gold: accept
+- Vertict: reject
+- Agree: NO
+- Note: failed: clear_scope
 
 **Check rationale**
 
-[One check from the `rubric.md` uploaded to `tools/issue-select/`, quoted as it is
-currently written, with the reasoning behind its current form.]
+| Check | Evidence | Pass condition | Weight |
+|---|---|---|---|
+| clear_scope | issue body | The issue must clearly define a single concrete defect or focused feature request, even if it suggests multiple potential fixes or itemizes missing elements. Only reject issues that serve as open-ended discussions asking for design direction, broad umbrella epics, or posts lacking a specific problem statement. | required |
+
+I added this check because I wanted to avoid issues that are underspecified or too ambiguous. As a newer contributor to open source projects, issues that are too broad in scope, or where the deliverable is unclear can add a layer of complexity to the experience I want to avoid. Ideally this check ensures that the accepted issues are atomic in scope with an end-goal I can easily understand.
 
 **Trade-offs**
 
-[What the quoted check gives up. Any one of these is a complete answer: an issue whose
-result it changes, a canary you re-ran with `--only`, a case you accept it will miss, or a
-stated reason nothing changed elsewhere. "Nothing changed, and here is how I know" earns
-the point in full when the reason follows.]
+This check produced mixed verticts on subsequent reruns for `issue-01`. About half the time it would agree with the gold standard, and half the time it would differ. I suspect the model gets confused by language like "should", "could", or "consider" and determines the issue wording is too ambiguous. This issue also names multiple files that should be updated, which the model may iterpret as the issue being too broad in scope. The risk is that this check misses well-scoped and documented issues that would otherwise be an ideal fit for a new contributor given the issue's detailed description. 
 
 ---
 
 ## Selection rationale
 
-Graded on whether all three are answered, in your own words. Not on how good the
-reasoning is, and not on length — a short honest answer to each earns the full marks.
-This is also the basis for the claim comment you write in Unit 2.
-
 **Selection rationale**
 
-[Answer all three:
-
-1. The issue's fit to your interests and to the time available.
-2. What the verdict identified correctly, and what you weighed that the rubric could
-   not.
-3. The anticipated difficulty in claiming it.]
+1. I've been doing a lot of CI/CD and frontend work lately, so wanted to pivot back to backend work. As a Tier 2 issue, the same tier I completed for AI201, I know it's something I can complete over the course of a week with the 4-6 hour time estimate.
+2. Correctly identified the enhancement lable, bounded scope, and my desire for feature (enhancement) related work rather than just bug fixes. I considered my testing experience, which is more limited than my other experience, but the rubric and my scope doc didn't include any reference to my testing experience. That said I saw this as an opportunity to gain more experience with testing, and an opportunity to get hands on with a new testing methodology.
+3. I have never used the `hypothesis` before so that will be a learning experience. 
 
 ---
 
