@@ -90,10 +90,7 @@ Adding the space character as an optional separator widens the scope of what res
 
 **Branch**
 
-[The name of the branch you built the change on, exactly as it appears in your fork. The
-naming shape is a type prefix, then the issue number, then a short description. **The issue
-number in the branch name must be the number of the issue you claimed** — a name carrying
-any other number does not satisfy this field.]
+`fix/53-us-phone-regex-separators`
 
 **Evidence**
 
