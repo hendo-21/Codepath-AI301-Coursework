@@ -119,6 +119,8 @@ assertions, and when it passes, it accepts the second sentence as an honest flag
 
 **Check rationale**
 
+| Check | evidence | Pass Condition | Weight |
+|---|---|---|---|
 | honesty-calibrated | The plan's stated confidence (claims, risks, caveats), compared to what the diagnosis evidence actually supports | The plan flags genuine unknowns as unknowns rather than asserting them as settled; it does not state a risk, assumption, or untested step as fact | required |
 
 This check is a guard against overclaiming, which speaking from personal experience, is a tendency new
