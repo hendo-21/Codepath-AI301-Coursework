@@ -6,6 +6,5 @@ graded on being answered, not on there being deviations to report.
 
 ## Deviations
 
-[What changed between the plan you posted and the change you built, and
-why. If nothing changed, say so in your own words - "nothing changed;
-the plan held" earns these points in full. Leaving this blank does not.]
+Nothing deviated from the posted plan. I implemented the fix and followed
+the verification steps exactly as described. 
