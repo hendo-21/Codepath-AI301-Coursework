@@ -94,6 +94,146 @@ Adding the space character as an optional separator widens the scope of what res
 
 **Evidence**
 
+**Before the build:** <br>
+Confirmed failing tests for `TestPIIScrubber` after activating the .venv:
+
+```bash
+=================================== short test summary info ====================================
+XFAIL tests/unit/test_pii_scrubber.py::TestPIIScrubber::test_us_phone_number_redaction - issue #53: PII scrubber does not redact parenthesized US phone numbers
+XFAIL tests/unit/test_pii_scrubber.py::TestPIIScrubber::test_us_phone_formats - issue #53: PII scrubber does not redact parenthesized US phone numbers
+XFAIL tests/unit/test_pii_scrubber.py::TestPIIScrubber::test_detect_phone_pii - issue #53: PII scrubber does not redact parenthesized US phone numbers
+XFAIL tests/unit/test_pii_scrubber.py::TestPIIScrubber::test_phone_at_start_of_text - issue #53: PII scrubber does not redact parenthesized US phone numbers
+```
+
+Wrote a small script as the issue described (test 1 below). After reviewing the regex pattern for us phone numbers, I noticed parentheses were handled but the space character was missing as an optional separator. The additional tests evaluate `scrub()` and `detect()`'s handling of the optional parentheses and `-` or `.` separators:
+```python
+from safety.pii_scrubber import PIIScrubber
+
+s = PIIScrubber()
+print('\nTest 1:Issue description test')
+print(s.scrub('Call me at (555) 123-4567 or 555-123-4567'))
+print(s.detect('Call me at (555) 123-4567'))
+
+print('\nTest 2: optional area code parentheses and optional - or . separator')
+print(s.scrub('Call me at (555)-123-4567 or 555-123-4567'))
+print(s.detect('Call me at (555)-123-4567'))
+
+print('\nTest 3: optional area code parentheses and mixed optional separator')
+print(s.scrub('Call me at (555)123-4567 or 555-123-4567'))
+print(s.detect('Call me at (555)123-4567'))
+
+print('\nTest 4: optional area code parentheses and no optional separator')
+print(s.scrub('Call me at (555)1234567 or 555-123-4567'))
+print(s.detect('Call me at (555)1234567'))
+
+print('\nTest 5: no area code parentheses and no optional separator')
+print(s.scrub('Call me at 5551234567 or 555-123-4567'))
+print(s.detect('Call me at 5551234567'))
+```
+
+**Expected vs. Actual**
+
+Per the commented lines from the issue description code block, expected output is:
+
+```bash
+Call me at (555) 123-4567 or [REDACTED]
+[]
+```
+
+Test script terminal output matches the expected output (test 1) exactly. I've included the `detect()` logger line for visibility:
+
+```bash
+Test 1: Issue description test
+Call me at (555) 123-4567 or [REDACTED]
+2026-09-28 11:43:10 [info     ] pii_detected                   count=0 types=0
+[]
+
+Test 2: optional area code parentheses and optional - or . separator
+Call me at ([REDACTED] or [REDACTED]
+2026-09-28 11:43:10 [info     ] pii_detected                   count=1 types=1
+[{'type': 'phone_us', 'value': '555)-123-4567', 'start': 12, 'end': 25}]
+
+Test 3: optional area code parentheses and mixed optional separator
+Call me at ([REDACTED] or [REDACTED]
+2026-09-28 11:43:10 [info     ] pii_detected                   count=1 types=1
+[{'type': 'phone_us', 'value': '555)123-4567', 'start': 12, 'end': 24}]
+
+Test 4: optional area code parentheses and no optional separator
+Call me at ([REDACTED] or [REDACTED]
+2026-09-28 11:43:10 [info     ] pii_detected                   count=1 types=1
+[{'type': 'phone_us', 'value': '555)1234567', 'start': 12, 'end': 23}]
+
+Test 5: no area code parentheses and no optional separator
+Call me at [REDACTED] or [REDACTED]
+2026-09-28 11:43:10 [info     ] pii_detected                   count=1 types=1
+[{'type': 'phone_us', 'value': '5551234567', 'start': 11, 'end': 21}]
+```
+
+**After the build:** <br>
+Activated the .venv and ran the same unit tests for the PII scrubber: `tests/unit/test_pii_scrubber.py`.
+Command used:
+
+```bash
+pytest -rx \
+  "tests/unit/test_pii_scrubber.py::TestPIIScrubber::test_us_phone_number_redaction" \
+  "tests/unit/test_pii_scrubber.py::TestPIIScrubber::test_us_phone_formats" \
+  "tests/unit/test_pii_scrubber.py::TestPIIScrubber::test_detect_phone_pii" \
+  "tests/unit/test_pii_scrubber.py::TestPIIScrubber::test_phone_at_start_of_text"
+```
+
+Output:
+```bash
+tests/unit/test_pii_scrubber.py ....                                                                                                      [100%]
+
+ ================================================   4 passed in 0.13s ================================================ 
+```
+
+Ran the same test script described above, but with the additional test noted in the plan. The new
+test is shared below:
+```python
+print('\nTest 6: area code parenthesis directly after a word character')
+print(s.scrub('call(555) 123-4567 or 555-123-4567'))
+print(s.detect('call(555) 123-4567'))
+```
+
+Output:
+```bash
+Test 1:Issue description test
+Call me at [REDACTED] or [REDACTED]
+2026-10-06 10:04:26 [info     ] pii_detected                   count=1 types=1
+[{'type': 'phone_us', 'value': '(555) 123-4567', 'start': 11, 'end': 25}]
+
+Test 2: optional area code parentheses and optional - or . separator
+Call me at [REDACTED] or [REDACTED]
+2026-10-06 10:04:26 [info     ] pii_detected                   count=1 types=1
+[{'type': 'phone_us', 'value': '(555)-123-4567', 'start': 11, 'end': 25}]
+
+Test 3: optional area code parentheses and mixed optional separator
+Call me at [REDACTED] or [REDACTED]
+2026-10-06 10:04:26 [info     ] pii_detected                   count=1 types=1
+[{'type': 'phone_us', 'value': '(555)123-4567', 'start': 11, 'end': 24}]
+
+Test 4: optional area code parentheses and no optional separator
+Call me at [REDACTED] or [REDACTED]
+2026-10-06 10:04:26 [info     ] pii_detected                   count=1 types=1
+[{'type': 'phone_us', 'value': '(555)1234567', 'start': 11, 'end': 23}]
+
+Test 5: no area code parentheses and no optional separator
+Call me at [REDACTED] or [REDACTED]
+2026-10-06 10:04:26 [info     ] pii_detected                   count=1 types=1
+[{'type': 'phone_us', 'value': '5551234567', 'start': 11, 'end': 21}]
+
+Test 6: area code parenthesis directly after a word character
+call[REDACTED] or [REDACTED]
+2026-10-06 10:04:26 [info     ] pii_detected                   count=1 types=1
+[{'type': 'phone_us', 'value': '(555) 123-4567', 'start': 4, 'end': 18}]
+(.venv) ianhenderson@Ians-MacBook-Air pathreview-ai301-fa26-s1 % 
+```
+
+**Expected vs. Actual** <br>
+Expected: all four failing unit tests pass and the test script shows all phone number variants are correctly redacted and detected, leading parenthesis included. <br>
+Actual: matches expected result.
+
 ## Eval iterations
 
 **Run history**
