@@ -60,6 +60,17 @@ one in the week it belongs to.
 [2-4 sentences: what you built (the scout, your strategy), what broke
 or fell short, what changed because of it.]
 
+Given I am still quite new to the world of open source, I focused my
+strategy on finding issues labeled "good first issue" and "easy". I
+am interested in pushing myself, so I also included queries for
+enhancement or feature work. Initial scans using my scout returned
+lots issues created same-day in small/personal projects. These issues
+did not align with my goals of contributing to established projects,
+so I added queries to grab repos with greater than 200 stars, and
+then filter the issues by those repos. I also added a more comprehensive
+list of technologies and practices I am famliar with to my fit profile
+to help my scout find issues more suited to my experience.
+
 **Unit 6: [one line on the tool work]**
 
 [2-4 sentences: the voice-guard, the repo-memory file. What broke or
