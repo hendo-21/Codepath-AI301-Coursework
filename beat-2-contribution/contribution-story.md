@@ -54,10 +54,7 @@ happened; these entries are the toolkit's own timeline.
 All four entries are graded. Keep every heading below, and fill each
 one in the week it belongs to.
 
-**Unit 5: [one line on the tool work]**
-
-[2-4 sentences: what you built (the scout, your strategy), what broke
-or fell short, what changed because of it.]
+**Unit 5: Set up my issue-scout skill and establish a search strategy**
 
 Given I am still quite new to the world of open source, I focused my
 strategy on finding issues labeled "good first issue" and "easy". I
@@ -70,11 +67,16 @@ then filter the issues by those repos. I also added a more comprehensive
 list of technologies and practices I am familiar with to my fit profile
 to help my scout find issues more suited to my experience.
 
-**Unit 6: [one line on the tool work]**
+**Unit 6: Set up my voice-guard hook and create a local Claude memory file for the issue where my repo lives**
 
-[2-4 sentences: the voice-guard, the repo-memory file. What broke or
-fell short, and what changed because of it. "Nothing broke" counts when
-it is true - say how you know.]
+For my voice-guard skill, I extended my voice guide with rules for how I talk to
+maintainers. The rules I created focus on helping me stay honest about showing my
+work, providing context when it's necessary, and respecting maintainers' time.
+After install, the hook failed on the no-body test, and then passed for the
+subsequent times I used it. I also created the repo-memory file, which includes
+important context from my claim comment, a table detailing the subsystem my issue
+touches, and critical norms and policies I need to follow for my work and
+eventual PR submittal.
 
 **Unit 7: [one line on the tool work]**
 
@@ -90,24 +92,67 @@ drafted, what you did with the draft.]
 
 ## Why I Chose This Issue
 
-[1-2 paragraphs in your own words: how you searched, what your scan
-surfaced, what your scout's verdict said, why this issue fits your
-profile, and what you hope to learn. If your scout's verdict on it
-was reject and you chose it anyway, say so here and say why; choosing
-against your own tool silently is what loses points. Close with an
-honest read of the tool itself: where the scout fell short on a real
-wild search and what you changed or would change, or what convinced
-you it held up. **Record the link to your claim comment in this section too.**
-Not claimed yet? Write `claim pending` and today's date where the link goes,
-and add the link the moment your claim lands.]
+Going into this course I was hoping to dedicate time to an issue that focused on
+feature development or an enhancement, so this motivated my search initially.
+Using the Codepath issue search website, I selected my desired languages (Python, C,
+and JavaScript), and then feature, enhancement, and good first issue labels, as well
+as a couple of the named orgs. I also wanted to contribute to an established project.
+After a lengthy search through claimed or stale issues, I found two that looked
+appealing. The first was adding a package to `open-telemetry`, and the second was finishing
+incomplete modules for `typeshed`. My scout revealed a critical fit issue with the `open-telemetry`
+issue, which was that issue required Kotlin/Gradle/Android, none of which I have experience
+with. The second issue my scout initially rejected on the grounds that the issue was stale,
+and the scope was infeasible. As evidence, it cited a lengthy gap between comments and
+earlier comments: `'Finish incomplete modules' spans many stubs; maintainer says
+remaining ones 'not particularly approachable'`.
+
+However, the scout missed that the most recent comment from a collaborator provided
+guidance on where to look for incomplete stubs and modules. I reviewed the stubs folder
+for third-party packages that `typeshed` provides type hints for and found one I was
+familiar with: `networkx`. There I noticed some incomplete stubs for algorithms I used
+for a course I took last term. I had a hunch this would be a good fit despite the reject
+verdict. Before asking for a re-grade, I updated my rubric based on friction noted
+by my scout to patch an issue where `stale_issue` measured gap between comments
+instead of time since last activity, and to patch an issue with `scope_feasible` that
+missed comments where a maintainer redirects an issue as they did with this issue. I then
+re-graded the issue on the redirection provided by the maintainer, and my own intended scope per
+their redirection, and the scout issued an accept verdict with it now passing on the
+previously failing checks `stale_issue` and `scope_feasible`. I looked at the source
+code for the `networkx` function stubs I intend to complete for the PR and they
+motivate a simple one-line change for about 10 functions, which is an appropriate
+scope for the amount of time I have remaining in the course. The work also fits because
+Python is my strongest language and I have a small amount of bug fix open-source experience,
+so reading through the source code to find the proper return type should feel familiar.
+Typeshed is also a large project so it fits with my motivations on that front. From
+a learning perspective, I've always wondered how functions get their type annotations
+so this will be an entirely new domain.
+
+[\[Claim comment link\]](https://github.com/python/typeshed/issues/14031#issuecomment-6586150705)
 
 **Toolkit**
 
 - Tool: issue-scout (your scout: your search strategy, your rubric),
   and how you used it
-- What it produced: [the scan and its verdict on this issue, described]
-- Difficulties: [where it fell short, or "none met" if none did]
-- What changed: [what you patched or would update, or "nothing"]
+  issue-scout - used to conduct a full scan, and to grade the two issues selected
+  from the Codepath issue selection site. Full scan focused on finding populated repos,
+  issues with labels `good first issue`, `enhancement`, `feature`, split among my three
+  familiar programming languages: Python, C, and JavaScript. `rubric.md` was patched with
+  the `scope_feasible` check which replaced `clear_scope` from the sandbox era. Also changed
+  `stale_issue` and `scope_feasible` as described above. Since a maintainer redirected the issue
+  in a comment in the issue thread, I asked my scout to re-grade a scope I described based on
+  that redirection.
+- What it produced: Full scan produced lots of issues in small repos opened same day as scan until
+  I added a query for repos with a certain star count. The initial scan on the two issues produced
+  `accept` and `reject` verdicts on the `open-telemetry` and `typeshed` issues respectively. As
+  noted, the issues were more due to shortcomings with the rubric. After patching the rubric
+  as described above, the `typeshed` issue got an `accept` verdict and a `moderate` rating
+  after describing my planned scope as invited to by the maintainer's comment redirecting
+  the issue.
+- Difficulties: None really. The issues were mostly related to the queries and rubric. Both
+  patched and improved scout outcomes.
+- What changed: As noted, I patched the queries for a full scan to include repos meeting a
+  certain star threshold, and I patched the rubric to more accurately reflect how issues
+  show up in the wild.
 
 ---
 
