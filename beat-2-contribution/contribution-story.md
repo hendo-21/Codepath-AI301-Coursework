@@ -11,7 +11,7 @@ files and no evidence uploads are part of Assignment 5.
 **Student:** Ian Henderson
 **GitHub Username:** hendo-21
 **Issue:** [\[GitHub issue link\]](https://github.com/python/typeshed/issues/14031)
-**Pull Request:** [\[GitHub PR link, once opened\]](https://github.com/python/typeshed/pull/16729)
+**Pull Request:** [\[GitHub PR link\]](https://github.com/python/typeshed/pull/16729)
 
 One repository, built across units 5 to 8, telling the whole story of your real
 contribution. Fill it as you work, not at the end — the sections below ask for evidence that
@@ -78,10 +78,14 @@ important context from my claim comment, a table detailing the subsystem my issu
 touches, and critical norms and policies I need to follow for my work and
 eventual PR submittal.
 
-**Unit 7: [one line on the tool work]**
+**Unit 7: Set up my ship-gate tool and defined a ship manifest, grounded in repo policies**
 
-[2-4 sentences: the ship-gate and your gate manifest. What it produced
-on your real branch, what fought you, what changed because of it.]
+For my ship-gate skill, I created a ship manifest: a set of required checks that must
+be pass prior to opening a PR. These checks are specific to the repo I'm working and
+were built from the repo's CONTRIBUTING.md and AGENTS.md files. The manifest leaves
+room for excluding failing checks that don't touch my fix, but for this repo there
+were none. I made no changes to my ship manifest or the tool after my initial draft
+as my PR passed CI and was merged quickly with no feedback.
 
 **Unit 8: [one line on the tool work]**
 
@@ -386,17 +390,137 @@ def main() -> None:
 
 ## Testing Strategy
 
-[What observable checks prove the fix: your reproduction steps re-run
-against the built change (before and after), and the repo's own test
-suite or checks with the outcome shown. "Tests pass" with nothing
-observable named is not a strategy.]
+Post fix, my test script shows expected behavior: revealed type is `networkx.classes.graph.Graph[int,...]` and the type checker flags 3 issues
+in the test script. See below for evidence. Per repo policy, I also ran the required test suite, which showed all tests passing before and
+after my fix. Evidence also shared below.
+
+**Test Script (see Implementation Plan)** </br>
+BEFORE:
+```text
+repro_14031.py:13: note: Revealed type is "networkx.classes.graph.Graph[Any, dict[str, Any], dict[str, Any]]"
+repro_14031.py:18: note: Revealed type is "networkx.classes.graph.Graph[Any, dict[str, Any], dict[str, Any]]"
+repro_14031.py:23: note: Revealed type is "networkx.classes.graph.Graph[Any, dict[str, Any], dict[str, Any]]"
+Success: no issues found in 1 source file
+```
+
+AFTER:
+```text
+repro_14031.py:14: note: Revealed type is "networkx.classes.graph.Graph[int, dict[str, Any], dict[str, Any]]"
+repro_14031.py:16: error: "int" has no attribute "upper"  [attr-defined]
+repro_14031.py:19: note: Revealed type is "networkx.classes.graph.Graph[int, dict[str, Any], dict[str, Any]]"
+repro_14031.py:21: error: "int" has no attribute "upper"  [attr-defined]
+repro_14031.py:24: note: Revealed type is "networkx.classes.graph.Graph[int, dict[str, Any], dict[str, Any]]"
+repro_14031.py:26: error: "int" has no attribute "upper"  [attr-defined]
+Found 3 errors in 1 file (checked 1 source file)
+```
+
+**Repo Tests** </br>
+Python 3.10 tests BEFORE:
+```text
+$ PATH="$PWD/.venv/bin:$PATH" .venv/bin/python tests/runtests.py stubs/networkx --python-version 3.10
+--- TEST SUMMARY: All tests passed! ---
+
+pre-commit Success
+Check structure: Success
+Pyright: Success
+ty: Success
+pyrefly: Success
+mypy: Success
+stubtest: Skipped
+Pyright regression tests: Success
+mypy regression test: Success
+
+```
+
+Python 3.12 tests BEFORE:
+```text
+$ PATH="$PWD/.venv/bin:$PATH" .venv/bin/python tests/runtests.py stubs/networkx --run-stubtest --python-version 3.12
+...
+--- TEST SUMMARY: All tests passed! ---
+
+pre-commit Success
+Check structure: Success
+Pyright: Success
+ty: Success
+pyrefly: Success
+mypy: Success
+stubtest: Success
+Pyright regression tests: Success
+mypy regression test: Success
+
+```
+
+Python 3.10 tests AFTER:
+```text
+$ PATH="$PWD/.venv/bin:$PATH" .venv/bin/python tests/runtests.py stubs/networkx --python-version 3.10
+...
+--- TEST SUMMARY: All tests passed! ---
+
+pre-commit Success
+Check structure: Success
+Pyright: Success
+ty: Success
+pyrefly: Success
+mypy: Success
+stubtest: Skipped
+Pyright regression tests: Success
+mypy regression test: Success
+```
+
+Python 3.12 tests AFTER:
+```text
+$ PATH="$PWD/.venv/bin:$PATH" .venv/bin/python tests/runtests.py stubs/networkx --run-stubtest --python-version 3.12
+...
+--- TEST SUMMARY: All tests passed! ---
+
+pre-commit Success
+Check structure: Success
+Pyright: Success
+ty: Success
+pyrefly: Success
+mypy: Success
+stubtest: Success
+Pyright regression tests: Success
+mypy regression test: Success
+```
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: pr-precheck - checked my draft against my commit and changes therein.
+- What it produced: A summary of my draft PR, the changes and my claims, checked against my rubric and voice guide.
+- Difficulties: The tool functioned as intended, and correctly flagged accidental drift in my draft PR. As a part of ship-gate, I ran the tool
+  three times to get an accept. Here's a summary from pr-precheck for when ship-gate returned a HOLD:
+  ```text
+  in your rubric's words:
+    - clear-title [fail]: Title says "graph-returning algorithm stubs" but diff also retypes minimum_spanning_edges, an Iterator[_Node]-returning (non-graph) function
+    - description-matches-diff [fail]: Description's claim and function list never mention minimum_spanning_edges, which the diff changes
+    - no-drift [fail]: minimum_spanning_edges change in mst.pyi is absent from plan.md's 10-function scope table and has no deviation note
+    - reviewable [fail]: minimum_spanning_edges hunk in mst.pyi is an unrelated, unplanned edit not contributing to the stated fix
+  Fix your branch. If a check asks for something this repo doesn't ask for, fix that check in your rubric instead, and say so in your Unit 7 Toolkit entry.
+  ```
+- What changed: Reverted the accidental drift, ammended my commit, and pushed the commit. Here's the summary from the instance ship-gate
+  accepted my draft:
+  ```text
+  Scope check: repository is `python/typeshed`, a public repo — in scope per `scope.md`. No course house rules apply; repo conventions (`CONTRIBUTING.md`, `AGENTS.md`) govern. No linked PRs or issue thread were available to check for parallel work, so that courtesy can't be verified from this package.
+
+  Voice-guide check: no violations found. The description is a single grounded summary sentence, cites upstream line links as evidence, discloses the agent factually, carries no timeline language, no obsequiousness, and stays concise.
+
+  ## Per-check findings
+
+  **clear-title** — "[networkx] replace incomplete in graph-returning algorithm stubs" names exactly the diff's scope: 10 functions across `mst.pyi`, `core.pyi`, `unary.pyi` all changing `Graph[Incomplete]` → `Graph[_Node]`. Doesn't overclaim (e.g., doesn't imply all `Incomplete` in networkx is fixed) or underclaim. **Pass.**
+
+  **description-matches-diff** — The description's claim ("functions build their return graphs from the input G's nodes, so return type can be `Graph[_Node]`") is borne out in all three changed files. All three upstream links correspond to real sources. One minor simplification: the `mst.py#L609` link is used as a single representative citation for all four `mst.pyi` functions, though `plan.md`'s own table shows they build graphs at different lines (609/673/736/918/966). This doesn't misstate what changed, and the plan's own table backs the claim — not drift, just compressed citation. **Pass.**
+
+  **no-drift** — Plan names exactly 10 functions in exactly these 3 files; diff touches exactly those 10 functions in exactly those 3 files, plus the one disclosed-by-plan import removal in `unary.pyi` (plan step 2). Nothing else changed. **Pass.**
+
+  **tested** — No issue thread was found (confirmed absent by the gate), so there's no issue-named repro to re-run; the plan substitutes its own verification script (`repro_14031.py`), which was run and shows the post-fix result (`reveal_type` → `Graph[int, ...]`, 3 expected `.upper()` errors). Both required test commands from `AGENTS.md`/`plan.md` were run and their full pasted output is present, including the initial black autofix being resolved before the final clean run. **Pass.**
+
+  **reviewable** — Every hunk is a return-type edit or the one import removal; the line-collapsing in `core.pyi` is Black's mechanical consequence of the shorter annotation, not unrelatedformatting churn. No debug code, no dead code, no unrelated edits. **Pass.**
+
+  **follows-repo-asks** — AGENTS.md asks: follow CONTRIBUTING.md (generic, satisfied), no new test files for simple `.pyi` changes (none added), one-sentence summary (satisfied), no testing plan in description (satisfied), link to issue or describe problem — never both (description describes the problem only, consistent), agent name disclosed in the author's own words (satisfied). **Pass.**
+
+  **internal-consistency** — Single-paragraph description, link list, and agent disclosure all describe the same change; no contradictory headings or leftover copy-paste text. **Pass.**
+  ```
 
 ---
 
@@ -404,69 +528,38 @@ observable named is not a strategy.]
 
 **[11/06/26]**
 
-Confirmed in `networkx` source code personally that the return graphs consist of the input graphs nodes. Where I was unsure about the `networkx` code,
-I used Claude to flesh out my understanding so that I can stand behind the change. `Graph[Incomplete]` changed to `Graph[_Node]` to all functions named in "Solution Approach".
+Confirmed in `networkx` source code personally that the return graphs consist of the input graphs nodes. Where I was unsure about 
+the `networkx` code, I used Claude to flesh out my understanding so that I can stand behind the change. `Graph[Incomplete]` changed to
+`Graph[_Node]` to all functions named in "Solution Approach".
 
 Ran all tests per my implementation plan and confirmed they all passed. My fix is now complete and there were no deviations from the plan.
 
+**[11/06/26]**
+
+Accidentally changed the return type for a function `mimimum_spanning_edges`, a function not named in my fix scope. Accident was caught by
+my ship-gate and pr-precheck tools. Restored the return type to `Iterator[Incomplete]` and ammended my commit and pushed, before opening my PR. Repo policies say not to ammend commits, but that's only after a PR has been opened. 
+
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
-
-```text
-in your rubric's words:
-  - clear-title [fail]: Title says "graph-returning algorithm stubs" but diff also retypes minimum_spanning_edges, an Iterator[_Node]-returning (non-graph) function
-  - description-matches-diff [fail]: Description's claim and function list never mention minimum_spanning_edges, which the diff changes
-  - no-drift [fail]: minimum_spanning_edges change in mst.pyi is absent from plan.md's 10-function scope table and has no deviation note
-  - reviewable [fail]: minimum_spanning_edges hunk in mst.pyi is an unrelated, unplanned edit not contributing to the stated fix
-Fix your branch. If a check asks for something this repo doesn't ask for, fix that check in your rubric instead, and say so in your Unit 7 Toolkit entry.
-```
-
-```text
-| Check | Grade | Evidence |
-|---|---|---|
-| clear-title | pass | Title names exactly what the diff does — ten `Graph[Incomplete]` → `Graph[_Node]` swaps across `core.pyi`, `unary.pyi`, `mst.pyi` — and claims nothing more. |
-| description-matches-diff | pass | The three upstream-link groups (mst.pyi/core.pyi/unary.pyi) match the diff's three changed files and ten functions exactly; no "follows the plan" over-claim. |
-| no-drift | pass | Every function the plan named (4 in mst.pyi, 5 in core.pyi, 1 in unary.pyi) is in the diff; the `unary.pyi` import removal was pre-disclosed in plan.md step 2; `core_number`/`onion_layers` (dict-returning, out of scope) are untouched. |
-| tested | pass | Test evidence runs both required `runtests.py` invocations (py3.10, py3.12+stubtest) — the only failure was an auto-fixable `black` formatting diff (expected per CONTRIBUTING.md's pre-commit.ci autofix note), resolved by the second run's clean `black` pass. The plan's verification script (`repro_14031.py`) was run and shows the exact before/after effect: `reveal_type` now resolves to `Graph[int, ...]` and mypy catches the `.upper()` misuse. No formal issue repro exists to re-run since #14031 is a type-completeness issue, not a behavioral bug — plan's verification step stands in for it. |
-| reviewable | pass | Every hunk is a return-type edit or the disclosed import removal; no debris, no unrelated edits, no formatting churn beyond the auto-fix already accounted for. |
-| follows-repo-asks | pass | Tests run before submitting, problem described (no issue link used, which is the other half of AGENTS.md's either/or), agent disclosed by name and purpose, commit message follows the repo's `[package] summary` convention seen in recent history. |
-| internal-consistency | pass | Single coherent body: claim, upstream links grouped by file, agent disclosure — nothing contradicts anything else. |
-
-
-Scope check: repository is `python/typeshed`, a public repo — in scope per `scope.md`. No course house rules apply; repo conventions (`CONTRIBUTING.md`, `AGENTS.md`) govern. No linked PRs or issue thread were available to check for parallel work, so that courtesy can't be verified from this package.
-
-Voice-guide check: no violations found. The description is a single grounded summary sentence, cites upstream line links as evidence, discloses the agent factually, carries no timeline language, no obsequiousness, and stays concise.
-
-## Per-check findings
-
-**clear-title** — "[networkx] replace incomplete in graph-returning algorithm stubs" names exactly the diff's scope: 10 functions across `mst.pyi`, `core.pyi`, `unary.pyi` all changing `Graph[Incomplete]` → `Graph[_Node]`. Doesn't overclaim (e.g., doesn't imply all `Incomplete` in networkx is fixed) or underclaim. **Pass.**
-
-**description-matches-diff** — The description's claim ("functions build their return graphs from the input G's nodes, so return type can be `Graph[_Node]`") is borne out in all three changed files. All three upstream links correspond to real sources. One minor simplification: the `mst.py#L609` link is used as a single representative citation for all four `mst.pyi` functions, though `plan.md`'s own table shows they build graphs at different lines (609/673/736/918/966). This doesn't misstate what changed, and the plan's own table backs the claim — not drift, just compressed citation. **Pass.**
-
-**no-drift** — Plan names exactly 10 functions in exactly these 3 files; diff touches exactly those 10 functions in exactly those 3 files, plus the one disclosed-by-plan import removal in `unary.pyi` (plan step 2). Nothing else changed. **Pass.**
-
-**tested** — No issue thread was found (confirmed absent by the gate), so there's no issue-named repro to re-run; the plan substitutes its own verification script (`repro_14031.py`), which was run and shows the post-fix result (`reveal_type` → `Graph[int, ...]`, 3 expected `.upper()` errors). Both required test commands from `AGENTS.md`/`plan.md` were run and their full pasted output is present, including the initial black autofix being resolved before the final clean run. **Pass.**
-
-**reviewable** — Every hunk is a return-type edit or the one import removal; the line-collapsing in `core.pyi` is Black's mechanical consequence of the shorter annotation, not unrelatedformatting churn. No debug code, no dead code, no unrelated edits. **Pass.**
-
-**follows-repo-asks** — AGENTS.md asks: follow CONTRIBUTING.md (generic, satisfied), no new test files for simple `.pyi` changes (none added), one-sentence summary (satisfied), no testing plan in description (satisfied), link to issue or describe problem — never both (description describes the problem only, consistent), agent name disclosed in the author's own words (satisfied). **Pass.**
-
-**internal-consistency** — Single-paragraph description, link list, and agent disclosure all describe the same change; no contradictory headings or leftover copy-paste text. **Pass.**
-```
+- Tool: ship-gate - built a ship manifest for the tool so that it runs repo-specific checks on the drafted changes. All checks must pass in
+  order to open a PR. The manifest was built from the repo policy docs CONTRIBUTING.md and AGENTS.md, which emphasized running existing
+  tests, and being responsible that CI passes. Since CI can only be checked when the PR is opened, there was no check to add. All tests passed
+  prior to my fix so there were none to exclude; the repo explicitly asks contributors to omit tests for small changes like mine.
+- What it produced: it ran each command in my ship manifest and then ran my pr-precheck tool. 
+- Difficulties: I forgot to commit my changes on my first run of ship-gate, so the tool failed. My second use of the tool flagged the
+  drift described above. The tools themselves worked perfectly and I made no changes to the manifest or pr-precheck rubric.
+- What changed: As mentioned in the previous section, I reverted the accidental drift, amended the commit and pushed the change before
+  re-running ship gate and getting a "ready to post" verdict.
 
 ---
 
 ## Pull Request
 
-**PR Link:** [\[GitHub PR URL when opened\]](https://github.com/python/typeshed/pull/16729)
+**PR Link:** [\[GitHub PR URL\]](https://github.com/python/typeshed/pull/16729)
 
 **PR Description:** 
 
-The networkx functions below build their return graphs from the input G's nodes, so their return types can be Graph[_Node] to match the input Graph[_Node], instead of Graph[Incomplete].
+The networkx functions below build their return graphs from the input G's nodes, so their return types can be `Graph[_Node]` to match the input `Graph[_Node]`, instead of `Graph[Incomplete]`.
 
 networkx 3.6.1 source:
 
@@ -480,11 +573,9 @@ Agent: Claude Code (claude-opus-5-5), used to find other functions that build th
 
 **Maintainer Feedback:**
 
-- [Date]: [feedback received, or "none yet"; silence is a normal
-  state and costs you nothing]
-- [Date]: [how you addressed it]
+- [11/07/26]: PR merged with no comment or feedback.
 
-**Status:** Awaiting review
+**Status:** Merged
 
 **Toolkit**
 
@@ -492,8 +583,6 @@ Agent: Claude Code (claude-opus-5-5), used to find other functions that build th
 - What it produced:
 - Difficulties:
 - What changed:
-
-
 
 ---
 
