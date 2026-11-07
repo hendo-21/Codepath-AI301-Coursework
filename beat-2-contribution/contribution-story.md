@@ -81,16 +81,25 @@ eventual PR submittal.
 **Unit 7: Set up my ship-gate tool and defined a ship manifest, grounded in repo policies**
 
 For my ship-gate skill, I created a ship manifest: a set of required checks that must
-be pass prior to opening a PR. These checks are specific to the repo I'm working and
+pass prior to opening a PR. These checks are specific to the repo I'm working in and
 were built from the repo's CONTRIBUTING.md and AGENTS.md files. The manifest leaves
 room for excluding failing checks that don't touch my fix, but for this repo there
 were none. I made no changes to my ship manifest or the tool after my initial draft
 as my PR passed CI and was merged quickly with no feedback.
 
-**Unit 8: [one line on the tool work]**
+**Unit 8: Set up pr-monitor and defined its playbook**
 
 [2-4 sentences: the PR-monitor and your playbook. What it read, what it
 drafted, what you did with the draft.]
+
+I created the rules for my playbook using the repo's contributor docs and by reviewing
+open and closed PRs to get a sense of maintainer behaviour. I ran pr-monitor on my PR
+branch and it read the PR thread, providing me with information on the thread status,
+like time of last activity, number of checks passed, state, etc., and a draft comment
+grounded in the thread context. Since my PR was merged quite quickly, its drafted
+comment included a thank you for the review and merge, and a statement reiterating
+key details about the PR. I posted the thank you in the merged and closed PR and
+rejected the rest.
 
 ---
 
@@ -392,7 +401,7 @@ def main() -> None:
 
 Post fix, my test script shows expected behavior: revealed type is `networkx.classes.graph.Graph[int,...]` and the type checker flags 3 issues
 in the test script. See below for evidence. Per repo policy, I also ran the required test suite, which showed all tests passing before and
-after my fix. Evidence also shared below.
+after my fix. Evidence is also shared below.
 
 **Test Script (see Implementation Plan)** </br>
 BEFORE:
@@ -498,7 +507,7 @@ mypy regression test: Success
     - reviewable [fail]: minimum_spanning_edges hunk in mst.pyi is an unrelated, unplanned edit not contributing to the stated fix
   Fix your branch. If a check asks for something this repo doesn't ask for, fix that check in your rubric instead, and say so in your Unit 7 Toolkit entry.
   ```
-- What changed: Reverted the accidental drift, ammended my commit, and pushed the commit. Here's the summary from the instance ship-gate
+- What changed: Reverted the accidental drift, amended my commit, and pushed the commit. Here's the summary from the instance ship-gate
   accepted my draft:
   ```text
   Scope check: repository is `python/typeshed`, a public repo — in scope per `scope.md`. No course house rules apply; repo conventions (`CONTRIBUTING.md`, `AGENTS.md`) govern. No linked PRs or issue thread were available to check for parallel work, so that courtesy can't be verified from this package.
@@ -528,16 +537,16 @@ mypy regression test: Success
 
 **[11/06/26]**
 
-Confirmed in `networkx` source code personally that the return graphs consist of the input graphs nodes. Where I was unsure about 
+Confirmed in `networkx` source code personally that the return graphs consist of the input graph's nodes. Where I was unsure about
 the `networkx` code, I used Claude to flesh out my understanding so that I can stand behind the change. `Graph[Incomplete]` changed to
-`Graph[_Node]` to all functions named in "Solution Approach".
+`Graph[_Node]` in all functions named in "Solution Approach".
 
 Ran all tests per my implementation plan and confirmed they all passed. My fix is now complete and there were no deviations from the plan.
 
 **[11/06/26]**
 
-Accidentally changed the return type for a function `mimimum_spanning_edges`, a function not named in my fix scope. Accident was caught by
-my ship-gate and pr-precheck tools. Restored the return type to `Iterator[Incomplete]` and ammended my commit and pushed, before opening my PR. Repo policies say not to ammend commits, but that's only after a PR has been opened. 
+Accidentally changed the return type for a function `minimum_spanning_edges`, a function not named in my fix scope. The accident was caught by
+my ship-gate and pr-precheck tools. Restored the return type to `Iterator[Incomplete]`, amended my commit, and pushed before opening my PR. Repo policies say not to amend commits, but that's only after a PR has been opened.
 
 **Toolkit**
 
@@ -573,16 +582,26 @@ Agent: Claude Code (claude-opus-5-5), used to find other functions that build th
 
 **Maintainer Feedback:**
 
+- [11/07/26]: PR opened. Awaiting reply.
 - [11/07/26]: PR merged with no comment or feedback.
 
 **Status:** Merged
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: pr-monitor and its playbook (`playbook.md`). The playbook was straightforward to produce because CONTRIBUTING.md already shared
+  review timeline expectations, how to follow up etc. The work was providing samples of posts I would make in my own voice.
+- What it produced: My PR was merged within 12 hours or so of opening it, with no feedback, so the pr-monitor only had the merge action to
+  work with. It produced a merge thank-you note and reiterated some of the work I did in the PR. For example:
+  ```text
+  The issue noted in my claim comment (#14031) can't be closed by this PR alone — it covers many other incomplete-stub cases beyond the ten functions here, so this is a partial contribution toward it, not a full fix.
+
+  Nothing was deliberately left out of scope within the three files touched (`mst.pyi`, `core.pyi`, `unary.pyi`); all ten candidate functions identified were addressed.
+  ```
+- Difficulties: I didn't think it was necessary to include comments reiterating the work, or the files that were changed that the maintainer
+  just reviewed and approved. I did accept the thank you note though and posted it.
+- What changed: I rejected the part of draft-move that re-stated the work I completed and the comment about the issue noted in my PR. I posted
+  the thank you to the merged and closed PR.
 
 ---
 
@@ -605,10 +624,7 @@ Toolkit blocks above are full of them.]
 
 ## Resources Used
 
-[What actually helped, not a reading list. List things this story
-already shows you using: the doc you followed to set the environment
-up, the thread that explained the bug, the person who answered you.
-One real entry beats ten plausible ones.]
-
-- [Link to documentation that helped]
-- [Discussion, issue, or post that helped]
+- [CONTRIBUTING.md helped a lot for setting up my environment, creating my testing plan and draft PR](https://github.com/python/typeshed/blob/main/CONTRIBUTING.md)
+- [`networkx` 3.6.1 source code](https://github.com/networkx/networkx/tree/networkx-3.6.1/networkx)
+- [Closed typeshed PRs as reference for the shape of my PR draft](https://github.com/python/typeshed/pulls?q=is%3Apr+state%3Aclosed)
+- [Python docs on static typing](https://typing.python.org/en/latest/)
