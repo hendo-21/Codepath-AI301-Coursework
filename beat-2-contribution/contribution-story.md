@@ -201,7 +201,7 @@ that a node of type `int` cannot be made uppercase, and the `reveal_type(tree)` 
 **Current Behavior**
 
 Using `mypy`:
-```bash
+```text
 Revealed type is "networkx.classes.graph.Graph[Any, dict[str, Any], dict[str, Any]]"
 Success: no issues found
 ```
@@ -225,10 +225,14 @@ source code context: networkx 3.6.1
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: repro-check - used to grade and iterate on my reproduction report
+- What it produced: As far as understanding the issue goes, repro-check helped me dig deeper into both the affected `typeshed` in
+  order to provide satisfactory justification for my claims. It pushed me to find and name the specific lines from the upstream
+  source code that justify my claims, as you will find in the next section, "Reproduction Process - Analysis".
+- Difficulties: The tool repro-check tool rejected my report twice before accepting my third revision. The issues were not with
+  components of the tool, but rather with insufficiently justifying my claims.
+- What changed: Nothing with the rubric or any piece of the tool changed. The tool helped push me to cite specific parts of the
+  codebase and upstream source code to justify my claims.
 
 ---
 
@@ -306,29 +310,77 @@ Issue" section.
 
 **Analysis**
 
-[Your analysis of the root cause: what is causing the issue, traced
-to the files and functions involved.]
+The function stubs named below are currently incomplete for the function's return type (they show 
+`Graph[Incomplete]`). Type checkers interpret that the return type of the graph's nodes is `Any`. This is inconsistent with the `networkx` source code which shows that the graph returned by the function is built using the nodes from the input graph. This means that the type of the node in the return graph should be the same type as that of the node in the input graph. 
+
+| Stub (typeshed line) | Upstream function (line) | How the return graph is built (line) |
+|---|---|---|
+| `stubs/networkx/networkx/algorithms/tree/mst.pyi` `minimum_spanning_tree` (L70) | `tree/mst.py#L557` | `T = G.__class__()` + `add_nodes_from(G.nodes.items())` (L609) |
+| `stubs/networkx/networkx/algorithms/tree/mst.pyi` `partition_spanning_tree` (L74) | `tree/mst.py#L617` | same pattern (L673) |
+| `stubs/networkx/networkx/algorithms/tree/mst.pyi` `maximum_spanning_tree` (L78) | `tree/mst.py#L681` | same pattern (L736) |
+| `stubs/networkx/networkx/algorithms/tree/mst.pyi` `random_spanning_tree` (L82) | `tree/mst.py#L745` | `nx.empty_graph(G.nodes)` (L918) or `nx.Graph()` + `add_edges_from(U)`, where U is a subset of `G.edges()` (L966) |
+| `stubs/networkx/networkx/algorithms/core.pyi` `k_core` (L12) | `core.py#L154` | `_core_subgraph` (L210), which returns `G.subgraph(nodes).copy()` (L125, L149) |
+| `stubs/networkx/networkx/algorithms/core.pyi` `k_shell` (L16) | `core.py#L215` | `_core_subgraph` (L277) |
+| `stubs/networkx/networkx/algorithms/core.pyi` `k_crust` (L20) | `core.py#L282` | inlined `G.subgraph(nodes).copy()` (L344) |
+| `stubs/networkx/networkx/algorithms/core.pyi` `k_corona` (L24) | `core.py#L349` | `_core_subgraph` (L406) |
+| `stubs/networkx/networkx/algorithms/core.pyi` `k_truss` (L26) | `core.py#L412` | `H = G.copy()` (L470), with edges/nodes removed, then `return H` (L488) |
+| `stubs/networkx/networkx/algorithms/operators/unary.pyi` `complement` (L13) | `operators/unary.py#L9` | `R = G.__class__()` + `add_nodes_from(G)` (L36) |
 
 **Proposed Solution**
 
-[High-level description of your fix approach, and what you are
-deliberately NOT changing.]
+My solution is to change `Graph[Incomplete]` to `Graph[_Node]` to match the stub's existing convention for the input graph: `Graph[_Node]`. My change is 
+limited to the instances where the return graph is constructed using the nodes from the input graph, and it touches only the named functions in the files
+above.
 
 **Implementation Plan**
 
-1. [Modify file X to do Y]
-2. [Add or change Z]
-3. [Update tests]
+1. Change the return type in each `typeshed` function stub listed above from `Graph[Incomplete]` to `Graph[_Node]`.
+2. Remove `from _typeshed import Incomplete` from `unary.pyi`. My fix resolves all incompletes for this stub.
+3. Run required repo tests: `PATH="$PWD/.venv/bin:$PATH" .venv/bin/python tests/runtests.py stubs/networkx --python-version 3.10` and `PATH="$PWD/.venv/bin:$PATH" .venv/bin/python tests/runtests.py stubs/networkx --run-stubtest --python-version 3.12`
+4. Save the test script below to `repro_14031.py` in the `typeshed` root
+5. From the root, run: `MYPYPATH=stubs/networkx mypy repro_14031.py` to confirm the reveal type is 
+`networkx.classes.graph.Graph[int,...]` and the `mypy` catches the three errors for trying to make an `int` 
+upper case. Script pasted below for reference.
 
-[Record deviations here as they happen: what changed mid-build and
-why. A recorded deviation is honest work; silent drift is not.]
+Test script:
+```python
+
+from typing import reveal_type
+
+import networkx as nx
+
+
+def main() -> None:
+    g: nx.Graph[int] = nx.Graph()
+    g.add_edge(1, 2, weight=1)
+    g.add_edge(2, 3, weight=2)
+    g.add_edge(1, 3, weight=3)
+
+    tree = nx.minimum_spanning_tree(g)  # algorithms/tree/mst.pyi
+    reveal_type(tree)
+    for n in tree.nodes:
+        n.upper()
+
+    core = nx.k_core(g)  # algorithms/core.pyi
+    reveal_type(core)
+    for n in core.nodes:
+        n.upper()
+
+    comp = nx.complement(g)  # algorithms/operators/unary.pyi
+    reveal_type(comp)
+    for n in comp.nodes:
+        n.upper()
+```
 
 **Toolkit**
 
-- Tool:
-- What it produced:
-- Difficulties:
-- What changed:
+- Tool: plan-check - used to grade my implementation plan and plan comment
+- What it produced: reached an accept verdict on my third pass. Each reject verdict was a result of a failing `internal-consistency` check. This was the
+  evidence cited by the tool for the failing check: `Comment: 'The function stubs my PR will target functions that are...' (merged-draft relic); plan says node type 'can be Graph[Any,...]'; 'three errors' vs ten functions."` and `Stub column lists 'operators/unary.py' instead of .pyi; step 3 is a leftover that duplicates steps 5-6 and comes before them.`
+- Difficulties: no issues with the tool itself, the feedback on the failing check was warranted. I made changes to the plan and not the tool. This check
+  did exactly what I wanted it to, which was catch bad copy-pastes and conflicting sentences.
+- What changed: I deleted bad copy-pastes, fixed garbled sentences, and expanded my implementation steps to include specifics on how I'll test my solution
+  so that it was consistent with my repro report and the repo's own standards.
 
 ---
 
