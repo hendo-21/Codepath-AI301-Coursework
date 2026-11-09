@@ -89,9 +89,6 @@ as my PR passed CI and was merged quickly with no feedback.
 
 **Unit 8: Set up pr-monitor and defined its playbook**
 
-[2-4 sentences: the PR-monitor and your playbook. What it read, what it
-drafted, what you did with the draft.]
-
 I created the rules for my playbook using the repo's contributor docs and by reviewing
 open and closed PRs to get a sense of maintainer behaviour. I ran pr-monitor on my PR
 branch and it read the PR thread, providing me with information on the thread status,
@@ -619,6 +616,14 @@ Toolkit blocks above are full of them.]
 **What I'd Do Differently Next Time**
 
 [Reflection on your process.]
+
+Due to life circumstances I was a bit behind this entire unit. It meant that I wasn't able to dig into the new tools (ship-gate, pr-monitor specifically)
+to understand how they work, as I would have liked to. It means that I leave this experience feeling confident in my ownership of the pieces I completed
+for the tool itself, ship manifest, voice guard, playbook etc., but the tools themselves do not feel like mine to own. I also would have approached my
+issue selection differently. While I'm happy with my contribution, I was really set on doing some sort of feature or enhancement work, which ultimately
+does not seem particularly compatible with this course given the emphasis on reproduction and testing. I spent a lot of time tailoring my scout to this
+end, but ultimately pivoted to my selected issue to meet the requirements and deadline; an experience that made my time spent on my scout feel a bit
+wasted. 
 
 ---
 
