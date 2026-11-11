@@ -606,16 +606,33 @@ Agent: Claude Code (claude-opus-5-5), used to find other functions that build th
 
 **Technical Skills Gained**
 
-[What you learned technically, named concretely.]
+I dug into the `networkx` source code to understand how the library builds graphs for the graph algorithms in the functions I provided node return types
+for in my PR. Specifically, I learned a few patterns for how `networkx` builds graphs from its input graph. The shared pattern first creates an empty
+graph of the same class as `G`, the input graph, for its return graph. It then copies the metadata to the new graph, copies the nodes from `G` and selected
+edges, depending on the graph algorithm in question. Another pattern `networkx` uses is to add the nodes from `G` by adding a selection of edges only. The
+third pattern is the function maps each node to a dict (this is related to the `core` set of algorithms), creates a view of those nodes and edges as a subgraph,
+and then copies that subgraph into a graph of the same class as `G`, the input graph, which it returns. I also learned how to prioritize type checker stubs
+with my own local copy of the stubs to test type checker behavior for those stubs (e.g. using `MYPYPATH=stubs/networkx` as described in my testing plan).
+This was my first time working with type annotations, so I learned about how an IDE like VSCode surfaces type errors. I learned how the type checker parses
+code into a syntax tree, looks up the relevant type signature in the checker's stubs, determines the correct type using the stub rules, then checks each
+operation to ensure the are compatible with the type. I also learned how an editor and checker keeps errors up to date using the Language Server Protocol,
+which rechecks code as it's edited. I mentioned in the above sections that `Incomplete` resolves to `Any`, which I learned essentially turns checking off
+for the stub. 
 
 **Challenges Overcome**
 
-[What was hard and how you solved it; point at the real events, the
-Toolkit blocks above are full of them.]
+- My scout rejected `#14031` as stale and infeasible, so I trusted my hunch, patched `stale_issue` to measure time since last activity and `scope_feasible`
+  to recognize maintainer redirects, and the regrade flipped to accept.
+- I accidentally retyped `minimum_spanning_edges`, which was outside my planned scope, and after ship-gate and pr-precheck put it on HOLD I reverted it
+  and amended the commit before opening the PR, when amending is still allowed by repo policy.
+- The `networkx` tests failed on unmodified main because `numpy` and `matplotlib` were missing, and I traced `matplotlib` to CI pulling it in through `seaborn`
+  rather than `METADATA.toml` before adding both to my setup steps.
+- Both repro-check and plan-check took three rounds to accept because my `internal_consistency` check kept catching leftover copy-paste and mismatched counts,
+  so I learned to reread my drafts for stale text before grading them.
+- typeshed's `AGENTS.md` says to link the issue or describe the problem but never both, so I described the problem, left out `Fixes #14031` so the PR wouldn't
+  close a broad tracking issue, and linked the PR to the issue with a comment there instead.
 
 **What I'd Do Differently Next Time**
-
-[Reflection on your process.]
 
 Due to life circumstances I was a bit behind this entire unit. It meant that I wasn't able to dig into the new tools (ship-gate, pr-monitor specifically)
 to understand how they work, as I would have liked to. It means that I leave this experience feeling confident in my ownership of the pieces I completed
@@ -623,7 +640,9 @@ for the tool itself, ship manifest, voice guard, playbook etc., but the tools th
 issue selection differently. While I'm happy with my contribution, I was really set on doing some sort of feature or enhancement work, which ultimately
 does not seem particularly compatible with this course given the emphasis on reproduction and testing. I spent a lot of time tailoring my scout to this
 end, but ultimately pivoted to my selected issue to meet the requirements and deadline; an experience that made my time spent on my scout feel a bit
-wasted. 
+wasted. Otherwise, I feel happy with my use of AI. I used it to help understand piece of the codebase, explain things I wasn't sure about, and identify
+certain areas of the codebase I could include in my fix, but otherwise I owned the implementation (small as it was) and tracing my change to upstream
+source code.
 
 ---
 
